@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayrollPro - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-container {
+            background: white;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .stats-row {
+            padding: 30px;
+            background: var(--light-bg);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid;
+            margin-bottom: 20px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stat-card.employees { border-left-color: var(--secondary-color); }
+        .stat-card.payroll { border-left-color: var(--success-color); }
+        .stat-card.pending { border-left-color: var(--warning-color); }
+        .stat-card.total { border-left-color: var(--danger-color); }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .stat-card p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .btn-custom {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            margin: 5px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+            color: white;
+        }
+
+        .btn-success-custom {
+            background: linear-gradient(135deg, var(--success-color) 0%, #219a52 100%);
+            color: white;
+        }
+
+        .btn-success-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+            color: white;
+        }
+
+        .btn-warning-custom {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #d68910 100%);
+            color: white;
+        }
+
+        .btn-warning-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+            color: white;
+        }
+
+        .btn-info-custom {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+        }
+
+        .btn-info-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+            color: white;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .table thead {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: var(--card-shadow);
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--secondary-color);
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                margin: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-row, .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-calculator"></i> PayrollPro</h1>
+            <p>Comprehensive Payroll Management System</p>
+            <div style="margin-top: 15px;">
+                <span style="opacity: 0.9; margin-right: 20px;">
+                    <i class="fas fa-user me-2"></i>{{ session.user_name }} ({{ session.user_role }})
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Statistics Row -->
+        <div class="stats-row">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card employees">
+                        <i class="fas fa-users text-info"></i>
+                        <h3>{{ total_employees }}</h3>
+                        <p>Total Employees</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card payroll">
+                        <i class="fas fa-money-bill-wave text-success"></i>
+                        <h3>{{ recent_payroll|length }}</h3>
+                        <p>Recent Payrolls</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card pending">
+                        <i class="fas fa-clock text-warning"></i>
+                        <h3>{{ monthly_stats|length }}</h3>
+                        <p>Monthly Records</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card total">
+                        <i class="fas fa-chart-line text-danger"></i>
+                        <h3>₹{{ "%.0f"|format(monthly_stats[0].total_payout if monthly_stats else 0) }}</h3>
+                        <p>Latest Month Payout</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="row">
+                <!-- Employee Management -->
+                <div class="col-lg-6">
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-user-plus"></i> Employee Management</h3>
+                        
+                        <!-- Add Single Employee -->
+                        <div class="mb-4">
+                            <button class="btn btn-primary-custom btn-custom" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                                <i class="fas fa-user-plus"></i> Add Employee
+                            </button>
+                            <button class="btn btn-success-custom btn-custom" data-bs-toggle="modal" data-bs-target="#bulkEmployeeModal">
+                                <i class="fas fa-upload"></i> Bulk Add
+                            </button>
+                            <a href="{{ url_for('download_employee_template') }}" class="btn btn-warning-custom btn-custom">
+                                <i class="fas fa-download"></i> Template
+                            </a>
+                        </div>
+
+                        <!-- Recent Employees -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>CTC</th>
+                                        <th>Department</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for emp in employees[:5] %}
+                                    <tr>
+                                        <td>{{ emp.emp_id }}</td>
+                                        <td>{{ emp.name }}</td>
+                                        <td>₹{{ "%.0f"|format(emp.ctc_monthly) }}</td>
+                                        <td>{{ emp.department or 'N/A' }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info-custom" onclick="viewEmployeeCostBreakdown('{{ emp.emp_id }}', '{{ emp.name }}', {{ emp.ctc_monthly }})">
+                                                <i class="fas fa-calculator"></i> View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payroll Management -->
+                <div class="col-lg-6">
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-calculator"></i> Payroll Management</h3>
+                        
+                        <!-- Process Payroll -->
+                        <div class="mb-4">
+                            <button class="btn btn-primary-custom btn-custom" data-bs-toggle="modal" data-bs-target="#processPayrollModal">
+                                <i class="fas fa-calculator"></i> Process Payroll
+                            </button>
+                            <button class="btn btn-success-custom btn-custom" data-bs-toggle="modal" data-bs-target="#bulkPayrollModal">
+                                <i class="fas fa-upload"></i> Bulk Process
+                            </button>
+                            <a href="{{ url_for('download_payroll_template') }}" class="btn btn-warning-custom btn-custom">
+                                <i class="fas fa-download"></i> Template
+                            </a>
+                        </div>
+
+                        <!-- Recent Payroll -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Month</th>
+                                        <th>Net Salary</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payroll in recent_payroll %}
+                                    <tr>
+                                        <td>{{ payroll.name }}</td>
+                                        <td>{{ payroll.month }} {{ payroll.year }}</td>
+                                        <td>₹{{ "%.0f"|format(payroll.net_salary) }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary-custom" onclick="viewPayslip('{{ payroll.emp_id }}', '{{ payroll.month }}', {{ payroll.year }})">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                            <a href="/download_payslip/{{ payroll.emp_id }}/{{ payroll.month }}/{{ payroll.year }}" class="btn btn-sm btn-success-custom">
+                                                <i class="fas fa-download"></i> PDF
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Payroll Management -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-file-invoice-dollar"></i> All Payroll Records</h3>
+                        
+                        <!-- Filter Options -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <select class="form-select" id="monthFilter">
+                                    <option value="">All Months</option>
+                                    <option value="January">January</option>
+                                    <option value="February">February</option>
+                                    <option value="March">March</option>
+                                    <option value="April">April</option>
+                                    <option value="May">May</option>
+                                    <option value="June">June</option>
+                                    <option value="July">July</option>
+                                    <option value="August">August</option>
+                                    <option value="September">September</option>
+                                    <option value="October">October</option>
+                                    <option value="November">November</option>
+                                    <option value="December">December</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="yearFilter">
+                                    <option value="">All Years</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2025">2025</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button class="btn btn-primary-custom btn-custom" onclick="loadAllPayrolls()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                                <button class="btn btn-success-custom btn-custom" data-bs-toggle="modal" data-bs-target="#emailModal">
+                                    <i class="fas fa-paper-plane"></i> Send Payslips
+                                </button>
+                                <button class="btn btn-warning-custom btn-custom" onclick="downloadReport()">
+                                    <i class="fas fa-file-excel"></i> Download Report
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- All Payroll Records Table -->
+                        <div class="table-responsive" id="allPayrollTable">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID</th>
+                                        <th>Name</th>
+                                        <th>Month/Year</th>
+                                        <th>Days Worked</th>
+                                        <th>Gross Salary</th>
+                                        <th>Net Salary</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payrollTableBody">
+                                    {% for payroll in all_payroll %}
+                                    <tr>
+                                        <td>{{ payroll.emp_id }}</td>
+                                        <td>{{ payroll.name }}</td>
+                                        <td>{{ payroll.month }} {{ payroll.year }}</td>
+                                        <td>{{ payroll.days_worked }} days</td>
+                                        <td>₹{{ "%.2f"|format(payroll.gross_salary) }}</td>
+                                        <td>₹{{ "%.2f"|format(payroll.net_salary) }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary-custom" onclick="viewPayslip('{{ payroll.emp_id }}', '{{ payroll.month }}', {{ payroll.year }})">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                            <a href="/download_payslip/{{ payroll.emp_id }}/{{ payroll.month }}/{{ payroll.year }}" class="btn btn-sm btn-success-custom">
+                                                <i class="fas fa-download"></i> PDF
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Actions -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-arrow-up"></i> Salary Hike Management</h3>
+                        <button class="btn btn-primary-custom btn-custom" data-bs-toggle="modal" data-bs-target="#hikeModal">
+                            <i class="fas fa-arrow-up"></i> Apply Hike
+                        </button>
+                        <p class="mt-2 text-muted">Select employee and apply salary hike during payroll processing</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-users"></i> Employee Overview</h3>
+                        <button class="btn btn-warning-custom btn-custom" data-bs-toggle="modal" data-bs-target="#allEmployeesModal">
+                            <i class="fas fa-list"></i> View All Employees
+                        </button>
+                        <p class="mt-2 text-muted">View complete employee list with details and salary information</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="section-card">
+                        <h3 class="section-title"><i class="fas fa-chart-bar"></i> Monthly Payroll Analytics</h3>
+                        <div class="chart-container">
+                            <canvas id="payrollChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Add Employee Modal -->
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus"></i> Add Employee</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('add_employee') }}">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="emp_id" class="form-label">Employee ID</label>
+                                    <input type="text" class="form-control" name="emp_id" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="designation" class="form-label">Designation</label>
+                                    <input type="text" class="form-control" name="designation">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="department" class="form-label">Department</label>
+                                    <input type="text" class="form-control" name="department">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="joining_date" class="form-label">Joining Date</label>
+                                    <input type="date" class="form-control" name="joining_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ctc_monthly" class="form-label">Monthly CTC (₹)</label>
+                                    <input type="number" class="form-control" name="ctc_monthly" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">PF Opted</label>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" name="pf_opted" checked>
+                                        <label class="form-check-label">Employee opts for Provident Fund</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-custom">Add Employee</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Add Employee Modal -->
+    <div class="modal fade" id="bulkEmployeeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-upload"></i> Bulk Add Employees</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('bulk_add_employees') }}" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="file-upload-area">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
+                            <h5>Upload Employee Excel File</h5>
+                            <p class="text-muted">Select your filled employee template file</p>
+                            <input type="file" class="form-control" name="file" accept=".xlsx,.xls" required>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Template Format:</strong> emp_id, name, email, designation, department, joining_date, ctc_monthly, pf_opted
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success-custom">Upload & Process</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Payroll Modal -->
+    <div class="modal fade" id="processPayrollModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calculator"></i> Process Individual Payroll</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('process_individual_payroll') }}">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="emp_id_select" class="form-label">Select Employee</label>
+                                    <select class="form-select" name="emp_id" required>
+                                        <option value="">Choose Employee...</option>
+                                        {% for emp in employees %}
+                                        <option value="{{ emp.emp_id }}">{{ emp.emp_id }} - {{ emp.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="days_worked" class="form-label">Days Worked</label>
+                                    <input type="number" class="form-control" name="days_worked" value="30" min="1" max="31" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="month" class="form-label">Month</label>
+                                    <select class="form-select" name="month" required>
+                                        <option value="January">January</option>
+                                        <option value="February">February</option>
+                                        <option value="March">March</option>
+                                        <option value="April">April</option>
+                                        <option value="May">May</option>
+                                        <option value="June">June</option>
+                                        <option value="July">July</option>
+                                        <option value="August">August</option>
+                                        <option value="September">September</option>
+                                        <option value="October">October</option>
+                                        <option value="November">November</option>
+                                        <option value="December">December</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="year" class="form-label">Year</label>
+                                    <input type="number" class="form-control" name="year" value="2024" min="2020" max="2030" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">PF Opted</label>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" name="pf_opted" checked>
+                                        <label class="form-check-label">Employee opts for PF deduction</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="hike_amount" class="form-label">Hike Amount (₹)</label>
+                                    <input type="number" class="form-control" name="hike_amount" value="0" step="0.01">
+                                    <small class="text-muted">Optional: Add hike to monthly CTC</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-custom">Process Payroll</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Process Payroll Modal -->
+    <div class="modal fade" id="bulkPayrollModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-upload"></i> Bulk Process Payroll</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('bulk_process_payroll') }}" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="month" class="form-label">Month</label>
+                                    <select class="form-select" name="month" required>
+                                        <option value="January">January</option>
+                                        <option value="February">February</option>
+                                        <option value="March">March</option>
+                                        <option value="April">April</option>
+                                        <option value="May">May</option>
+                                        <option value="June">June</option>
+                                        <option value="July">July</option>
+                                        <option value="August">August</option>
+                                        <option value="September">September</option>
+                                        <option value="October">October</option>
+                                        <option value="November">November</option>
+                                        <option value="December">December</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="year" class="form-label">Year</label>
+                                    <input type="number" class="form-control" name="year" value="2024" min="2020" max="2030" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="file-upload-area">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
+                            <h5>Upload Payroll Excel File</h5>
+                            <p class="text-muted">Select your filled payroll template file</p>
+                            <input type="file" class="form-control" name="file" accept=".xlsx,.xls" required>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Template Format:</strong> emp_id, name, days_worked, pf_opted
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success-custom">Upload & Process</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Hike Modal -->
+    <div class="modal fade" id="hikeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-arrow-up"></i> Apply Salary Hike</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('apply_hike') }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="hike_emp_id" class="form-label">Select Employee</label>
+                            <select class="form-select" name="emp_id" required>
+                                <option value="">Choose Employee...</option>
+                                {% for emp in employees %}
+                                <option value="{{ emp.emp_id }}">{{ emp.emp_id }} - {{ emp.name }} (Current: ₹{{ "%.0f"|format(emp.ctc_monthly) }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hike_amount" class="form-label">Hike Amount (₹)</label>
+                            <input type="number" class="form-control" name="hike_amount" step="0.01" required>
+                            <small class="text-muted">This amount will be added to the current monthly CTC</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hike_reason" class="form-label">Reason for Hike</label>
+                            <textarea class="form-control" name="hike_reason" rows="3" placeholder="Performance increment, promotion, etc."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-custom">Apply Hike</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div class="modal fade" id="emailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-envelope"></i> Send Payslips</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('send_payslips') }}">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email_month" class="form-label">Month</label>
+                                    <select class="form-select" name="month" required>
+                                        <option value="January">January</option>
+                                        <option value="February">February</option>
+                                        <option value="March">March</option>
+                                        <option value="April">April</option>
+                                        <option value="May">May</option>
+                                        <option value="June">June</option>
+                                        <option value="July">July</option>
+                                        <option value="August">August</option>
+                                        <option value="September">September</option>
+                                        <option value="October">October</option>
+                                        <option value="November">November</option>
+                                        <option value="December">December</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email_year" class="form-label">Year</label>
+                                    <input type="number" class="form-control" name="year" value="2024" min="2020" max="2030" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            This will send payslips to all employees who have processed payroll for the selected month/year.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success-custom">Send Payslips</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payslip View Modal -->
+    <div class="modal fade" id="payslipModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice-dollar"></i> Payslip Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="payslipContent">
+                    <!-- Payslip content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success-custom" id="downloadPayslipBtn">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Employees Modal -->
+    <div class="modal fade" id="allEmployeesModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-users"></i> All Employees</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Designation</th>
+                                    <th>Department</th>
+                                    <th>Monthly CTC</th>
+                                    <th>PF Opted</th>
+                                    <th>Joining Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for emp in employees %}
+                                <tr>
+                                    <td>{{ emp.emp_id }}</td>
+                                    <td>{{ emp.name }}</td>
+                                    <td>{{ emp.email }}</td>
+                                    <td>{{ emp.designation or 'N/A' }}</td>
+                                    <td>{{ emp.department or 'N/A' }}</td>
+                                    <td>₹{{ "%.2f"|format(emp.ctc_monthly) }}</td>
+                                    <td>
+                                        {% if emp.pf_opted %}
+                                            <span class="badge bg-success">Yes</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ emp.joining_date or 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Cost Breakdown Modal -->
+    <div class="modal fade" id="employeeCostModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-calculator"></i> Employee Cost Breakdown</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="employeeCostContent">
+                    <!-- Cost breakdown content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Chart.js for payroll analytics
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('payrollChart').getContext('2d');
+            
+            // Sample data - this would come from the backend in a real application
+            const monthlyData = {{ monthly_stats|tojson }};
+            const labels = [];
+            const data = [];
+            
+            monthlyData.forEach(function(item) {
+                labels.push(item.month + ' ' + item.year);
+                data.push(item.total_payout || 0);
+            });
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.reverse(),
+                    datasets: [{
+                        label: 'Monthly Payout (₹)',
+                        data: data.reverse(),
+                        backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Total Payout: ₹' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // View payslip function
+        function viewPayslip(empId, month, year) {
+            fetch(`/api/payslip/${empId}/${month}/${year}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('payslipContent').innerHTML = data.html;
+                        document.getElementById('downloadPayslipBtn').onclick = function() {
+                            window.open(`/download_payslip/${empId}/${month}/${year}`, '_blank');
+                        };
+                        new bootstrap.Modal(document.getElementById('payslipModal')).show();
+                    } else {
+                        alert('Error loading payslip: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading payslip');
+                });
+        }
+
+        // Load all payrolls with filtering
+        function loadAllPayrolls() {
+            const month = document.getElementById('monthFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            
+            let url = '/api/payrolls';
+            const params = new URLSearchParams();
+            if (month) params.append('month', month);
+            if (year) params.append('year', year);
+            if (params.toString()) url += '?' + params.toString();
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updatePayrollTable(data.payrolls);
+                    } else {
+                        alert('Error loading payrolls: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading payrolls');
+                });
+        }
+
+        function updatePayrollTable(payrolls) {
+            const tbody = document.getElementById('payrollTableBody');
+            tbody.innerHTML = '';
+            
+            payrolls.forEach(payroll => {
+                const row = `
+                    <tr>
+                        <td>${payroll.emp_id}</td>
+                        <td>${payroll.name}</td>
+                        <td>${payroll.month} ${payroll.year}</td>
+                        <td>${payroll.days_worked} days</td>
+                        <td>₹${parseFloat(payroll.gross_salary).toFixed(2)}</td>
+                        <td>₹${parseFloat(payroll.net_salary).toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary-custom" onclick="viewPayslip('${payroll.emp_id}', '${payroll.month}', ${payroll.year})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <a href="/download_payslip/${payroll.emp_id}/${payroll.month}/${payroll.year}" class="btn btn-sm btn-success-custom">
+                                <i class="fas fa-download"></i> PDF
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Add event listeners for filters
+        document.getElementById('monthFilter').addEventListener('change', loadAllPayrolls);
+        document.getElementById('yearFilter').addEventListener('change', loadAllPayrolls);
+
+        // View employee cost breakdown
+        function viewEmployeeCostBreakdown(empId, name, ctcMonthly) {
+            const breakdown = calculateSalaryBreakdown(ctcMonthly);
+            
+            const costHtml = `
+                <div class="cost-breakdown-container">
+                    <div class="employee-header" style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; border-radius: 8px;">
+                        <h3 style="margin: 0;">${name} (${empId})</h3>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9;">Monthly CTC: ₹${ctcMonthly.toFixed(2)}</p>
+                    </div>
+                    
+                    <div class="cost-table" style="background: white; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                        <div class="section-header" style="background: #2c3e50; color: white; padding: 15px; text-align: center;">
+                            <h4 style="margin: 0;">SALARY STRUCTURE</h4>
+                        </div>
+                        
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #3498db; color: white;">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Component</th>
+                                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Amount (₹)</th>
+                                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd;">Basic Salary</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${breakdown.basic_salary.toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">40%</td></tr>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd;">HRA</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${breakdown.hra.toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">20%</td></tr>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd;">Travel Allowance</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${breakdown.travel_allowance.toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">10%</td></tr>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd;">Medical Allowance</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${breakdown.medical_allowance.toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">5%</td></tr>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd;">LTA</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${breakdown.lta.toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">8%</td></tr>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd;">Special Allowance</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${breakdown.special_allowance.toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">17%</td></tr>
+                                <tr style="background: #e8f5e8; font-weight: bold;"><td style="padding: 12px; border: 1px solid #ddd;">GROSS SALARY</td><td style="padding: 12px; text-align: right; border: 1px solid #ddd;">₹${breakdown.gross_salary.toFixed(2)}</td><td style="padding: 12px; text-align: right; border: 1px solid #ddd;">100%</td></tr>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">Potential Deductions:</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;"></td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;"></td></tr>
+                                <tr><td style="padding: 10px; border: 1px solid #ddd; padding-left: 30px;">PF Contribution (12%)</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: #e74c3c;">₹${breakdown.pf_deduction.toFixed(2)}</td><td style="padding: 10px; text-align: right; border: 1px solid #ddd;">-12%</td></tr>
+                                <tr style="background: #2c3e50; color: white; font-weight: bold; font-size: 1.1em;"><td style="padding: 15px; border: 1px solid #ddd;">POTENTIAL NET SALARY</td><td style="padding: 15px; text-align: right; border: 1px solid #ddd;">₹${breakdown.net_salary.toFixed(2)}</td><td style="padding: 15px; text-align: right; border: 1px solid #ddd;">88%</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px;">
+                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> This is the salary structure breakdown. Actual deductions may vary based on PF opt-in, attendance, and other factors.
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('employeeCostContent').innerHTML = costHtml;
+            new bootstrap.Modal(document.getElementById('employeeCostModal')).show();
+        }
+
+        // Download report function
+        function downloadReport() {
+            const month = document.getElementById('monthFilter').value;
+            const year = document.getElementById('yearFilter').value;
+            
+            if (!month || !year) {
+                alert('Please select both month and year to download report');
+                return;
+            }
+            
+            window.open(`/download_report/${month}/${year}`, '_blank');
+        }
+
+        // Helper function to calculate salary breakdown
+        function calculateSalaryBreakdown(ctcMonthly) {
+            const basic_salary = ctcMonthly * 0.40;
+            const hra = ctcMonthly * 0.20;
+            const travel_allowance = ctcMonthly * 0.10;
+            const medical_allowance = ctcMonthly * 0.05;
+            const lta = ctcMonthly * 0.08;
+            const special_allowance = ctcMonthly * 0.17;
+            const gross_salary = basic_salary + hra + travel_allowance + medical_allowance + lta + special_allowance;
+            const pf_deduction = basic_salary * 0.12;
+            const net_salary = gross_salary - pf_deduction;
+            
+            return {
+                basic_salary,
+                hra,
+                travel_allowance,
+                medical_allowance,
+                lta,
+                special_allowance,
+                gross_salary,
+                pf_deduction,
+                net_salary
+            };
+        }
+    </script>
+</body>
+</html>
